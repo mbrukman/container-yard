@@ -1,0 +1,2 @@
+# Hide local overrides (custom vars, paths, etc.)
+local.*
