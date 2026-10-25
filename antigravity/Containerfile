@@ -21,12 +21,28 @@ FROM ubuntu:26.04
 # All other similar build-time env vars are also using ARG instead of VAR.
 ARG DEBIAN_FRONTEND=noninteractive
 
+# https://github.com/hadolint/hadolint/wiki/DL4006
+# https://docs.docker.com/develop/develop-images/instructions/#using-pipes
+#
+# Without setting this option, container build may only evaluate the success or
+# failure of the last command in a sequence of piped commands, so an earlier
+# command failing may be silentl ignored.
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # Need to install curl first to get the Google Chrome APT key below.
 # Ubuntu 26.04 base image has neither `curl` nor `wget`.
-RUN apt update -qq > /dev/null && \
-    apt install -qq -y \
+#
+# Adding `ca-certificates` and `gpg` explicitly so we can keep
+# `--no-install-recommends` but still keep the minimal set of required packages
+# to make the following commands work properly.
+RUN apt-get update -qq > /dev/null \
+    && apt-get install -qq -y --no-install-recommends \
+        ca-certificates \
         curl \
-        > /dev/null
+        gpg \
+        > /dev/null \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set up Google's signing key and repository for Google Chrome.
 # See https://www.google.com/linuxrepositories/ for more info.
@@ -44,8 +60,14 @@ RUN echo "deb [arch=amd64 signed-by=${GOOGLE_KEY}] https://dl.google.com/linux/c
     | tee "/etc/apt/sources.list.d/google-chrome.list" > /dev/null
 
 # Install Antigravity dependencies.
-RUN apt update -qq > /dev/null && \
-    apt install -qq -y \
+#
+# We are going to run another `apt-get install` below, so let's not clean up
+# here so we don't need to run `apt-get update` immediately aftwards to get the
+# same data back.
+#
+# hadolint ignore=DL3009
+RUN apt-get update -qq > /dev/null \
+    && apt-get install -qq -y --no-install-recommends \
         google-chrome-stable \
         libasound2t64 \
         libatk1.0-0 \
@@ -63,7 +85,7 @@ RUN apt update -qq > /dev/null && \
         > /dev/null
 
 # Install development tools.
-RUN apt install -qq -y \
+RUN apt-get install -qq -y --no-install-recommends \
         clang \
         clangd \
         gdb \
@@ -72,7 +94,9 @@ RUN apt install -qq -y \
         meson \
         sudo \
         tmux \
-        > /dev/null
+        > /dev/null \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Ubuntu comes with a user account `ubuntu` with uid=1000, gid=1000.
 # If this matches your user account, you're all set with this config.
