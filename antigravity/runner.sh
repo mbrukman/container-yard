@@ -18,13 +18,14 @@
 CONTAINER_TOOL="podman"
 
 # Build-time args
-CONTAINER_IMAGE_NAME="${CONTAINER_NAME:-antigravity-ide}"
+CONTAINER_IMAGE_NAME="${CONTAINER_NAME:-antigravity}"
 UNAME="ubuntu"  # Matches Ubuntu 26.04 default in Containerfile
 UID_IN_CONTAINER="${UID:-$(id -u)}"
 
 # Run-time params
-CONTAINER_RUN_NAME="${CONTAINER_RUN_NAME:-run-antigravity-ide}"
+CONTAINER_RUN_NAME="${CONTAINER_RUN_NAME:-run-antigravity}"
 CONTAINER_RUN_FLAGS="${CONTAINER_RUN_FLAGS:-}"
+ANTIGRAVITY_APP_INSTALL="/opt/antigravity"
 ANTIGRAVITY_IDE_INSTALL="/opt/antigravity-ide"
 MAPPED_HOME_DIR="/home/${USER}"
 
@@ -51,6 +52,7 @@ run() {
       --env=XDG_RUNTIME_DIR="/run/user/${UID_IN_CONTAINER}" \
       --env=XDG_SESSION_TYPE=wayland \
       --env=WAYLAND_DISPLAY="${WAYLAND_DISPLAY}" \
+      --env=ANTIGRAVITY=ide \
       --ipc=host \
       --net=host \
       --userns=keep-id \
@@ -58,8 +60,9 @@ run() {
       --volume="/var/run/dbus/system_bus_socket:/run/dbus/system_bus_socket:ro" \
       --volume="/run/user/${UID_IN_CONTAINER}/${WAYLAND_DISPLAY}:/run/user/${UID_IN_CONTAINER}/${WAYLAND_DISPLAY}:ro" \
       --volume="${XDG_RUNTIME_DIR}:/run/user/${UID}:rw" \
+      --volume="${ANTIGRAVITY_APP_INSTALL}:/opt/antigravity:z" \
       --volume="${ANTIGRAVITY_IDE_INSTALL}:/opt/antigravity-ide:z" \
-      --volume="${MAPPED_HOME_DIR}:/home/${UNAME}:rw,z" \
+      --volume="${MAPPED_HOME_DIR}:/home/${UNAME}/projects:rw,z" \
       ${CONTAINER_RUN_FLAGS} \
       "${CONTAINER_IMAGE_NAME}" \
       ${RUN_CMD:-}
@@ -70,15 +73,10 @@ shell() {
 }
 
 # Run function named by the first param
-case "${1:-}" in
-  build)
-    build
-    ;;
-  run)
-    run
-    ;;
-  shell)
-    shell
+readonly CMD="${1:-}"
+case "${CMD}" in
+  build|run|shell)
+    "${CMD}"
     ;;
   *)
     echo "Invalid command: '${1:-}'; available: build, run, shell" >&2

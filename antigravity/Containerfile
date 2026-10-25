@@ -104,18 +104,17 @@ ARG UNAME ubuntu
 RUN echo "${UNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 ARG HOME="/home/${UNAME}"
 WORKDIR "${HOME}"
-VOLUME "${HOME}"
+VOLUME "${HOME}/projects"
 USER "${UNAME}"
 
-# Install Antigravity IDE outside of the container so it can be updated easily without
-# having to rebuild the container every time.
+# Install Antigravity IDE or app outside of the container so it can be updated
+# easily without having to rebuild the container every time.
 VOLUME "/opt/antigravity-ide"
+VOLUME "/opt/antigravity"
 
-# Antigraviry requires D-Bus:
-# https://antigravity.google/docs/cli/troubleshooting/#authorize-keyring-permissions
-#
-# Using the Wayland approach here instead of the X11 approach since Ubuntu
-# 26.04 defaults to Wayland.
-#
-# Disabling GPU as it seems to error on startup.
-CMD ["/usr/bin/dbus-run-session", "--", "/opt/antigravity-ide/antigravity-ide", "--disable-gpu"]
+# Set this to "ide" or "app" and map at least the required volume above.
+ENV ANTIGRAVITY ide
+
+COPY run-antigravity.sh .
+
+CMD ["./run-antigravity.sh"]
