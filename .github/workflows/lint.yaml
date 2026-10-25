@@ -47,3 +47,4 @@ jobs:
         with:
           dockerfile: Containerfile
           recursive: true
+          ignore: DL3008

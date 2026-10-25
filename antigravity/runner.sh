@@ -33,12 +33,14 @@ if [ -e "local.sh" ]; then
   . "./local.sh"
 fi
 
-# Build the container.
+# Build the container. We need to use the Docker image format due to the SHELL
+# directive which the OCI format does not support.
 build() {
   "${CONTAINER_TOOL}" build \
       --build-arg UNAME="${UNAME}" \
       -t "${CONTAINER_IMAGE_NAME}" \
-      -f Containerfile
+      -f Containerfile \
+      --format docker
 }
 
 run() {
