@@ -69,5 +69,9 @@
    $ ./runner.sh shell
    ```
 
-   To start Antigravity, you can use the shell script `run-antigravity.sh`
-   that's in the home directory inside the container.
+   To start Antigravity, you can use the shell scripts `antigravity.sh` and
+   `antigravity-ide.sh` which are in the home directory inside the container.
+
+   To replicate the behavior above, you would need to use
+   `run-tmux-antigravity.sh` which also requires setting the `ANTIGRAVITY` env
+   var as described above.
