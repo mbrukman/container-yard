@@ -17,42 +17,24 @@
 readonly TMUX_SESSION="agy"
 readonly TMUX_WINDOW="Agy"
 
-readonly ANTIGRAVITY_APP="/opt/antigravity/antigravity"
-readonly ANTIGRAVITY_IDE="/opt/antigravity-ide/antigravity-ide"
-agy_binary=""
+agy_script=""
 
 case "${ANTIGRAVITY,,}" in
   app)
-    if ! [[ -f "${ANTIGRAVITY_APP}" ]]; then
-      echo "No Antigravity app found at ${ANTIGRAVITY_APP}" >&2
-      exit 1
-    fi
-    agy_binary="${ANTIGRAVITY_APP}"
+    agy_script="$(dirname $0)/antigravity.sh"
     ;;
   ide)
-    if ! [[ -f "${ANTIGRAVITY_IDE}" ]]; then
-      echo "No Antigravity IDE found at ${ANTIGRAVITY_IDE}" >&2
-      exit 2
-    fi
-    agy_binary="${ANTIGRAVITY_IDE}"
+    agy_script="$(dirname $0)/antigravity-ide.sh"
     ;;
   *)
     cat >&2 <<EOF
 Antigravity mode not specified via env var \${ANTIGRAVITY};
 expected either 'app' or 'ide'.
 EOF
-    exit 3
+    exit 1
     ;;
 esac
 
-# Antigravity requires D-Bus:
-# https://antigravity.google/docs/cli/troubleshooting/#authorize-keyring-permissions
-#
-# Using the Wayland approach here instead of the X11 approach since Ubuntu
-# 26.04 defaults to Wayland.
-#
-# Disabling GPU as it seems to error on startup.
 tmux new-session -s "${TMUX_SESSION}" -d \; \
-    new-window -n "${TMUX_WINDOW}" \
-        "/usr/bin/dbus-run-session -- ${agy_binary} --disable-gpu" \; \
+    new-window -n "${TMUX_WINDOW}" "${agy_script}" \; \
     attach-session -t "${TMUX_SESSION}"

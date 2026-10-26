@@ -1,3 +1,5 @@
 *
 !.gitignore
-!run-antigravity.sh
+!antigravity.sh
+!antigravity-ide.sh
+!run-tmux-antigravity.sh

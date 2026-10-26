@@ -118,4 +118,4 @@ ENV ANTIGRAVITY ide
 
 # This file is in `home` subdirectory and mapped as the user's home directory
 # inside the container.
-CMD ["./run-antigravity.sh"]
+CMD ["./run-tmux-antigravity.sh"]
