@@ -24,20 +24,24 @@
    $ ./runner.sh build
    ```
 
-2. Configure your local environment, e.g., Antigravity install directory, your
-   work directory, etc.
+2. Configure your local environment, e.g., Antigravity IDE and/or app install
+   directory, your work directory, etc.
 
    Create a file `local.sh` with the vars set at the top of `runner.sh` to
    update them.
 
-   For example, if you download the Antigravity IDE tarball and expand it in
-   your `${HOME}/Downloads` folder, and you are working on some projects in
-   `${HOME}/projects` directory, configure `local.sh` as follows:
+   For example, if you download the Antigravity IDE and/or app tarball and
+   expand them in your `${HOME}/Downloads` folder, and you are working on some
+   projects in `${HOME}/projects` directory, configure `local.sh` as follows:
 
    ```sh
+   ANTIGRAVITY_APP_INSTALL="${HOME}/Downloads/Antigravity"
    ANTIGRAVITY_IDE_INSTALL="${HOME}/Downloads/Antigravity IDE"
-   MAPPED_HOME_DIR="${HOME}/projects"
+   ANTIGRAVITY="ide"
+   MAPPED_PROJ_DIR="${HOME}/projects"
    ```
+
+   To run Antigravity app (not IDE), set `ANTIGRAVITY=app` instead.
 
 3. Start Antigravity IDE inside the container:
 
@@ -45,15 +49,25 @@
    $ ./runner.sh run
    ```
 
-   > Note: exiting Antigravity inside the container will exit the container!
+   This will start `tmux` and create 2 tabs: one with a shell, and one running
+   Antigravity (IDE or app, depending on your config). To run another command,
+   open the other shell inside `tmux`, or create another tab.
 
-   If you want to be able to drop into the shell inside the container, or run
-   other processes inside the container in parallel to the Antigravity IDE, or if
-   you want to debug the container or processes inside it, instead run:
+   > Note: this will map `$(pwd)/home` as the home directory, which is where
+   > Antigravity will store settings (e.g., in directories such as `.gemini`,
+   > `.config`, etc.), where you might be downloading files if you open a
+   > browser inside your container, etc.
+   >
+   > This also enables you to switch to other project directories and keep your
+   > Antigravity config, package caches, etc. shared across all your
+   > Antigravity invocations.
+
+4. If you want to be able to drop into the shell inside the container, before
+   Antigravity starts, without `tmux`, run:
 
    ```sh
    $ ./runner.sh shell
    ```
 
-   and then start Antigravity inside the container manually using the command
-   line at the end of the `Containerfile`.
+   To start Antigravity, you can use the shell script `run-antigravity.sh`
+   that's in the home directory inside the container.

@@ -27,7 +27,9 @@ CONTAINER_RUN_NAME="${CONTAINER_RUN_NAME:-run-antigravity}"
 CONTAINER_RUN_FLAGS="${CONTAINER_RUN_FLAGS:-}"
 ANTIGRAVITY_APP_INSTALL="/opt/antigravity"
 ANTIGRAVITY_IDE_INSTALL="/opt/antigravity-ide"
-MAPPED_HOME_DIR="/home/${USER}"
+ANTIGRAVITY="ide"
+MAPPED_HOME_DIR="$(pwd)/home"
+MAPPED_PROJ_DIR="/home/${USER}/projects"
 
 # Optional param overrides
 if [ -e "local.sh" ]; then
@@ -49,10 +51,10 @@ run() {
       -it \
       --device=/dev/dri \
       --env=DISPLAY \
+      --env=ANTIGRAVITY="${ANTIGRAVITY}" \
+      --env=WAYLAND_DISPLAY="${WAYLAND_DISPLAY}" \
       --env=XDG_RUNTIME_DIR="/run/user/${UID_IN_CONTAINER}" \
       --env=XDG_SESSION_TYPE=wayland \
-      --env=WAYLAND_DISPLAY="${WAYLAND_DISPLAY}" \
-      --env=ANTIGRAVITY=ide \
       --ipc=host \
       --net=host \
       --userns=keep-id \
@@ -62,7 +64,8 @@ run() {
       --volume="${XDG_RUNTIME_DIR}:/run/user/${UID}:rw" \
       --volume="${ANTIGRAVITY_APP_INSTALL}:/opt/antigravity:z" \
       --volume="${ANTIGRAVITY_IDE_INSTALL}:/opt/antigravity-ide:z" \
-      --volume="${MAPPED_HOME_DIR}:/home/${UNAME}/projects:rw,z" \
+      --volume="${MAPPED_HOME_DIR}:/home/${UNAME}:rw,z" \
+      --volume="${MAPPED_PROJ_DIR}:/home/${UNAME}/projects:rw,z" \
       ${CONTAINER_RUN_FLAGS} \
       "${CONTAINER_IMAGE_NAME}" \
       ${RUN_CMD:-}
