@@ -104,6 +104,7 @@ ARG UNAME ubuntu
 RUN echo "${UNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 ARG HOME="/home/${UNAME}"
 WORKDIR "${HOME}"
+VOLUME "${HOME}"
 VOLUME "${HOME}/projects"
 USER "${UNAME}"
 
@@ -115,6 +116,6 @@ VOLUME "/opt/antigravity"
 # Set this to "ide" or "app" and map at least the required volume above.
 ENV ANTIGRAVITY ide
 
-COPY run-antigravity.sh .
-
+# This file is in `home` subdirectory and mapped as the user's home directory
+# inside the container.
 CMD ["./run-antigravity.sh"]
